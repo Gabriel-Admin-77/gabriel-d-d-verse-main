@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, BookOpen, Sparkles, Loader2, ImageIcon, Trash2 } from "lucide-react";
 import { ChatMessage } from "@/lib/gameTypes";
@@ -22,6 +22,10 @@ interface NarrativeChatProps {
   onStatusEffect?: (effectId: string, duration: number) => void;
   onSkillCheck?: (skill: string, dc: number) => void;
   onRecipeDiscover?: (recipe: { id: string; name: string; ingredients: string[]; skill: string; dc: number; icon: string }) => void;
+}
+
+export interface NarrativeChatRef {
+  sendMessage: (input: string) => Promise<void>;
 }
 
 interface ParsedContent {
@@ -82,7 +86,7 @@ interface SceneArt {
   [messageId: string]: { url: string | null; loading: boolean };
 }
 
-const NarrativeChat = ({ characterId, character, adventure, worldEventContext, onMessagesChange, onDmResponse, onMonsterEncounter, onMonsterDefeated, onPuzzleTrigger, onNpcInteraction, onStatusEffect, onSkillCheck, onRecipeDiscover }: NarrativeChatProps) => {
+const NarrativeChat = forwardRef<NarrativeChatRef, NarrativeChatProps>(({ characterId, character, adventure, worldEventContext, onMessagesChange, onDmResponse, onMonsterEncounter, onMonsterDefeated, onPuzzleTrigger, onNpcInteraction, onStatusEffect, onSkillCheck, onRecipeDiscover }, ref) => {
   const getWelcomeMessage = (adv: Adventure | null): string => {
     if (adv) {
       return `Welcome, adventurer. You are about to embark on **${adv.title}** — set in the ${adv.setting}.\n\n*${adv.description}*\n\nDifficulty: ${adv.difficulty}. Prepare yourself.\n\n[CHOICE_1] Begin the adventure with caution, scouting ahead\n[CHOICE_2] Charge in boldly, ready for anything\n[CHOICE_3] Seek out local allies before proceeding\n[CHOICE_4] Study ancient texts about this place first`;
@@ -423,6 +427,10 @@ const NarrativeChat = ({ characterId, character, adventure, worldEventContext, o
     }
   };
 
+  useImperativeHandle(ref, () => ({
+    sendMessage
+  }));
+
   const handleSend = () => sendMessage(input);
   const handleChoiceClick = (choice: string) => sendMessage(choice);
 
@@ -559,6 +567,8 @@ const NarrativeChat = ({ characterId, character, adventure, worldEventContext, o
 
     </div>
   );
-};
+});
+
+NarrativeChat.displayName = "NarrativeChat";
 
 export default NarrativeChat;

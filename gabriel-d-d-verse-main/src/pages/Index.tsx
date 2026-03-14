@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,7 +7,8 @@ import CharacterBar from "@/components/game/CharacterBar";
 import DeathOverlay from "@/components/game/DeathOverlay";
 import DeathSavesOverlay from "@/components/game/DeathSavesOverlay";
 import WorldMap from "@/components/game/WorldMap";
-import NarrativeChat from "@/components/game/NarrativeChat";
+import NarrativeChat, { NarrativeChatRef } from "@/components/game/NarrativeChat";
+import ShopSidebar from "@/components/game/ShopSidebar";
 import CombatTracker from "@/components/game/CombatTracker";
 import InventorySidebar from "@/components/game/InventorySidebar";
 import JournalSidebar from "@/components/game/JournalSidebar";
@@ -26,6 +27,7 @@ import RewardAnimations, { useRewardAnimations } from "@/components/game/RewardA
 import AdventureRecap from "@/components/game/AdventureRecap";
 import StatusEffectsBar from "@/components/game/StatusEffectsBar";
 import RestPanel from "@/components/game/RestPanel";
+import TavernPanel from "@/components/game/TavernPanel";
 import SkillCheckOverlay from "@/components/game/SkillCheckOverlay";
 import RandomEncounterOverlay from "@/components/game/RandomEncounterOverlay";
 import WorldEventOverlay, { WorldEventBanner } from "@/components/game/WorldEventOverlay";
@@ -82,6 +84,7 @@ const Index = () => {
   const [activeWorldEvents, setActiveWorldEvents] = useState<ActiveWorldEvent[]>([]);
   const [pendingWorldEvent, setPendingWorldEvent] = useState<ActiveWorldEvent | null>(null);
   const handleMessagesChange = useCallback((msgs: ChatMessage[]) => setChatMessages(msgs), []);
+  const chatRef = useRef<NarrativeChatRef>(null);
   const ambient = useAmbientAudio(selectedAdventure?.id ?? null);
   const recap = AdventureRecap({
     characterId: character?.id ?? null,
@@ -735,6 +738,7 @@ const Index = () => {
         )}
         <div className="flex-1" style={{ minHeight: "400px" }}>
           <NarrativeChat
+            ref={chatRef}
             characterId={character?.id ?? null}
             character={character}
             adventure={selectedAdventure}
@@ -780,6 +784,22 @@ const Index = () => {
             characterHpMax={character?.hp_max || 1}
             onGoldChange={() => fetchCharacter()}
             onHeal={() => fetchCharacter()}
+          />
+          <TavernPanel
+            characterId={character?.id}
+            character={character}
+            adventure={selectedAdventure}
+            onSelectRumor={(choice) => {
+              if (chatRef.current) {
+                chatRef.current.sendMessage(`[PURSUE RUMOR] ${choice}`);
+              }
+            }}
+          />
+          <ShopSidebar
+            characterId={character?.id ?? null}
+            characterLevel={character?.level || 1}
+            characterGold={character?.gold || 0}
+            onPurchase={() => fetchCharacter()}
           />
           <RestPanel
             characterId={character?.id}
