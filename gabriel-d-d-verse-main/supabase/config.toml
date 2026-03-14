@@ -1,0 +1,19 @@
+project_id = "nhqdgdfiirbhtferoyzv"
+
+[functions.dungeon-master]
+verify_jwt = false
+
+[functions.scene-art]
+verify_jwt = false
+
+[functions.journal-summarize]
+verify_jwt = false
+
+[functions.adventure-recap]
+verify_jwt = false
+
+[functions.character-portrait]
+verify_jwt = false
+
+[functions.map-art]
+verify_jwt = false
